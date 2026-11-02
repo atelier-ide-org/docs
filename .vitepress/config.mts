@@ -1,12 +1,13 @@
 import { defineConfig, type DefaultTheme } from 'vitepress'
 import { execFileSync } from 'node:child_process'
+import path from 'node:path'
 import { loadCatalog, repoRoot, type Lang, type Section } from './catalog'
 
 // The documentation of Atelier IDE, in English (root) and French (`/fr/`). Each page exists in
-// both languages, at the same path. The pages of the built-in plugins and languages live in the
-// source code, in the `doc` folder of each one (see catalog.ts).
+// both languages, at the same path. The pages of the plugins and languages live in the source
+// code of the IDE (atelier-ide-org/app), in the `doc` folder of each one (see catalog.ts).
 
-const repo = 'https://github.com/atelier-ide-org/app'
+const repo = 'https://github.com/atelier-ide-org/docs'
 const catalog = loadCatalog()
 
 /** The pages of the plugins (or languages) that have one, by name. */
@@ -18,13 +19,19 @@ function pages(section: Section, prefix: string): DefaultTheme.SidebarItem[] {
     .sort((a, b) => a.text.localeCompare(b.text, lang))
 }
 
-/** "Edit this page" opens the file of the page, in the plugin for the pages of plugins. The
+/** "Edit this page" opens the file of the page: in this repository, in the repository of a
+ * native plugin (`plugins/<plugin>/…`, a submodule of the IDE), or in the code of the IDE. The
  * pattern is sent to the browser on its own: it cannot use `repo`. */
 function editLink(text: string): DefaultTheme.EditLink {
   return {
     text,
-    pattern: ({ filePath, params }) =>
-      `https://github.com/atelier-ide-org/app/edit/main/${params?.source ?? `docs/${filePath}`}`,
+    pattern: ({ filePath, params }) => {
+      const source: string | undefined = params?.source
+      if (!source) return `https://github.com/atelier-ide-org/docs/edit/main/${filePath}`
+      const plugin = source.match(/^plugins\/([^/]+)\/(.*)$/)
+      if (plugin) return `https://github.com/atelier-ide-org/plugin-${plugin[1]}/edit/main/${plugin[2]}`
+      return `https://github.com/atelier-ide-org/app/edit/main/${source}`
+    },
   }
 }
 
@@ -120,7 +127,10 @@ const fr = {
 
 export default defineConfig({
   title: 'Atelier IDE',
-  base: '/app/',
+  base: '/docs/',
+  // The code of the IDE may be cloned inside this repository (the CI does): its Markdown files
+  // are not pages.
+  srcExclude: ['app/**', 'README.md'],
   cleanUrls: true,
   lastUpdated: true,
   // The date of a page of a plugin is the one of its file in the plugin, not of the route file.
@@ -128,12 +138,16 @@ export default defineConfig({
     const source = page.params?.source
     if (!source) return
     try {
-      const out = execFileSync('git', ['log', '-1', '--format=%at', '--', source], { cwd: repoRoot })
+      // From the folder of the file: a native plugin is a submodule, with a history of its own.
+      const file = path.join(repoRoot, source)
+      const out = execFileSync('git', ['log', '-1', '--format=%at', '--', path.basename(file)], {
+        cwd: path.dirname(file),
+      })
       const seconds = Number(out.toString().trim())
       if (seconds) page.lastUpdated = seconds * 1000
     } catch {}
   },
-  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/app/logo.svg' }]],
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/docs/logo.svg' }]],
   themeConfig: {
     logo: '/logo.svg',
     socialLinks: [{ icon: 'github', link: repo }],

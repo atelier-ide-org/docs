@@ -1,7 +1,8 @@
-// The built-in plugins of the IDE, read from the `doc` folder of each one, so that the docs
-// follow the code:
+// The plugins of the IDE, read from the `doc` folder of each one in the code of the IDE
+// (atelier-ide-org/app), so that the docs follow the code:
 //
-//   src/plugins/builtins/<plugin>/doc/   (or src/languages/<language>/doc/)
+//   src/plugins/builtins/<plugin>/doc/   (or src/languages/<language>/doc/, or plugins/<plugin>/doc/
+//                                         for a native plugin, a submodule of the IDE)
 //     en-US.md   the page of the plugin, at /plugins/<plugin> (or /languages/<language>)
 //     fr-FR.md   its French page, at /fr/plugins/<plugin>
 //
@@ -21,7 +22,18 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parse } from 'yaml'
 
-export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
+/** The root of this repository. */
+export const docsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
+
+/** The code of the IDE: `ATELIER_APP`, else a clone of atelier-ide-org/app next to this
+ * repository (`../app`), with its submodules. */
+export const repoRoot = path.resolve(process.env.ATELIER_APP ?? path.join(docsRoot, '../app'))
+if (!fs.existsSync(path.join(repoRoot, 'src/plugins/builtins'))) {
+  throw new Error(
+    `The code of Atelier is not in ${repoRoot}: clone atelier-ide-org/app there ` +
+      '(git clone --recursive), or set ATELIER_APP to its folder.',
+  )
+}
 
 export type Section = 'plugins' | 'languages'
 export type Lang = 'en' | 'fr'
@@ -49,6 +61,7 @@ export interface CatalogPlugin {
 
 const roots: { dir: string; section: Section }[] = [
   { dir: 'src/plugins/builtins', section: 'plugins' },
+  { dir: 'plugins', section: 'plugins' },
   { dir: 'src/languages', section: 'languages' },
 ]
 
@@ -60,6 +73,10 @@ export const watched = roots.map((r) => `${repoRoot}/${r.dir}/**/doc/*.md`.repla
 /** Every `doc` folder under `dir`, with the plugin folders that hold it, outermost first. */
 function docFolders(dir: string, chain: string[] = []): { folder: string; chain: string[] }[] {
   const out: { folder: string; chain: string[] }[] = []
+  // `plugins/` holds the submodules of the native plugins, and a build of them.
+  if (!fs.existsSync(dir) || ['target', 'node_modules', '.git'].includes(path.basename(dir))) {
+    return out
+  }
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (!entry.isDirectory()) continue
     const sub = path.join(dir, entry.name)

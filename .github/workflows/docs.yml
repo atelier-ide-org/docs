@@ -1,0 +1,66 @@
+name: Docs
+
+# Builds the documentation (VitePress) and deploys it to GitHub Pages from `main`:
+# https://atelier-ide-org.github.io/docs/
+#
+# The pages and cards of the plugins and languages live in the code of the IDE, in their `doc`
+# folders (see .vitepress/catalog.ts): the code of atelier-ide-org/app is cloned into `app/`, with
+# its submodules (the native plugins). `app` is private: the secret APP_READ_TOKEN is a token that
+# may read its contents. Every night, the site is built again, to follow the code.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The "last updated" date of each page comes from git.
+          fetch-depth: 0
+      - uses: actions/checkout@v7
+        with:
+          repository: atelier-ide-org/app
+          path: app
+          token: ${{ secrets.APP_READ_TOKEN || github.token }}
+          submodules: recursive
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - run: bun install --frozen-lockfile
+      # Also fails on a dead link.
+      - run: bun run build
+        env:
+          ATELIER_APP: ${{ github.workspace }}/app
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: .vitepress/dist
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

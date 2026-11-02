@@ -41,7 +41,7 @@ In the code, a text is named by its key: `tr!("save")`, or `trf!("files_count", 
 | `src/features/` | Problems window and project search |
 | `src/project.rs` | Documents, language detection, file access |
 | `src/terminal*.rs`, `src/wsl.rs` | Pseudo-terminal, shells, VT100 screen, links, WSL |
-| `src/plugins/` | `builtin.rs` (the `BuiltinPlugin` and `Host` contract), `external.rs` (JSON manifests) and `builtins/` (Git, Markdown, Mermaid, MCP, Node.js, Maven, Gradle, Translations, Kubernetes, viewers…) |
+| `src/plugins/` | `builtin.rs` (the `BuiltinPlugin` and `Host` contract), `external.rs` (JSON manifests), `native.rs` (the libraries of native plugins) and `builtins/` (Git, Markdown, Mermaid, MCP, Node.js, Maven, Gradle, Translations, Kubernetes, viewers…) |
 | `src/graph/` | The context graph |
 | `src/i18n.rs`, `locales/` | Interface languages |
 | `src/cli.rs` | The `atelier <path>` command and the hand-off to a running IDE |
@@ -49,16 +49,20 @@ In the code, a text is named by its key: `tr!("save")`, or `trf!("files_count", 
 | `src/bin/atelier.rs`, `src/bin/atelier/` | The launcher (bootstrap): updates, startup window |
 | `installer/` | The Windows installer (Inno Setup) and the `atelier` command |
 | `build.rs` | Collects the icons and the locales, and gives the Windows executables their name and icon |
-| `docs/` | This documentation (VitePress) |
+| `plugins/` | Native plugins: git submodules (`gltf-viewer`, from atelier-ide-org/plugin-gltf-viewer), built with the IDE |
 
 ## Documentation
 
-The documentation is a [VitePress](https://vitepress.dev) site in `docs/`, built with [Bun](https://bun.sh), in English (root) and French (`docs/fr/`, same paths). Each page exists in both languages.
+The documentation is a [VitePress](https://vitepress.dev) site in its own repository, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), built with [Bun](https://bun.sh), in English (root) and French (`fr/`, same paths). Each page exists in both languages.
+
+It reads the pages of the plugins in the code of the IDE: clone both side by side (or set `ATELIER_APP` to the folder of the IDE).
 
 ```bash
+git clone --recursive git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/docs.git
 cd docs
 bun install
-bun run dev       # http://localhost:5173/app/
+bun run dev       # http://localhost:5173/docs/
 bun run build     # checks the links too
 ```
 

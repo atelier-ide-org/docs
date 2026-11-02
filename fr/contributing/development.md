@@ -41,7 +41,7 @@ Dans le code, un texte s'écrit par sa clé : `tr!("save")`, ou `trf!("files_cou
 | `src/features/` | Fenêtre Problèmes et recherche dans le projet |
 | `src/project.rs` | Documents, détection des langages, accès aux fichiers |
 | `src/terminal*.rs`, `src/wsl.rs` | Pseudo-terminal, shells, écran VT100, liens, WSL |
-| `src/plugins/` | `builtin.rs` (le contrat `BuiltinPlugin` et `Host`), `external.rs` (manifestes JSON) et `builtins/` (Git, Markdown, Mermaid, MCP, Node.js, Maven, Gradle, Traductions, Kubernetes, visionneuses…) |
+| `src/plugins/` | `builtin.rs` (le contrat `BuiltinPlugin` et `Host`), `external.rs` (manifestes JSON), `native.rs` (les bibliothèques des plugins natifs) et `builtins/` (Git, Markdown, Mermaid, MCP, Node.js, Maven, Gradle, Traductions, Kubernetes, visionneuses…) |
 | `src/graph/` | Le graphe de contexte |
 | `src/i18n.rs`, `locales/` | Langues de l'interface |
 | `src/cli.rs` | La commande `atelier <chemin>` et le relais vers un IDE déjà ouvert |
@@ -49,16 +49,20 @@ Dans le code, un texte s'écrit par sa clé : `tr!("save")`, ou `trf!("files_cou
 | `src/bin/atelier.rs`, `src/bin/atelier/` | Le lanceur (bootstrap) : mises à jour, fenêtre de démarrage |
 | `installer/` | L'installateur Windows (Inno Setup) et la commande `atelier` |
 | `build.rs` | Rassemble les icônes et les langues, et donne leur nom et leur icône aux exécutables Windows |
-| `docs/` | Cette documentation (VitePress) |
+| `plugins/` | Les plugins natifs : des sous-modules git (`gltf-viewer`, depuis atelier-ide-org/plugin-gltf-viewer), compilés avec l'IDE |
 
 ## Documentation
 
-La documentation est un site [VitePress](https://vitepress.dev) dans `docs/`, construit avec [Bun](https://bun.sh), en anglais (racine) et en français (`docs/fr/`, mêmes chemins). Chaque page existe dans les deux langues.
+La documentation est un site [VitePress](https://vitepress.dev) dans son propre dépôt, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), construit avec [Bun](https://bun.sh), en anglais (racine) et en français (`fr/`, mêmes chemins). Chaque page existe dans les deux langues.
+
+Elle lit les pages des plugins dans le code de l'IDE : clonez les deux côte à côte (ou indiquez le dossier de l'IDE dans `ATELIER_APP`).
 
 ```bash
+git clone --recursive git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/docs.git
 cd docs
 bun install
-bun run dev       # http://localhost:5173/app/
+bun run dev       # http://localhost:5173/docs/
 bun run build     # vérifie aussi les liens
 ```
 
