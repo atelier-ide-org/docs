@@ -50,12 +50,20 @@ Les arguments sont transmis comme des valeurs littérales, échappées pour le s
 
 ### Plugins natifs
 
-Un manifeste peut aussi apporter une bibliothèque dynamique, qui dessine dans l'IDE comme un plugin intégré : elle ouvre des fichiers dans un onglet de l'éditeur (la visionneuse de modèles 3D de `plugins/gltf-viewer`). Un tel plugin se range dans un dossier à lui, avec son manifeste nommé `plugin.json` et sa bibliothèque à côté :
+Un plugin natif est une bibliothèque dynamique qui dessine dans l'IDE comme un plugin intégré : il ouvre des fichiers dans un onglet de l'éditeur, comme la visionneuse de modèles 3D (glTF, GLB). Il se présente comme **un fichier à installer**, `<plugin>.atelier-plugin`.
+
+**Pour en installer un**, téléchargez son fichier dans la release `plugins/<plugin>/vX.Y.Z` du [dépôt des téléchargements](https://github.com/atelier-ide-org/releases/releases), où X.Y.Z est **la version d'Atelier que vous utilisez**. Cliquez ensuite sur **Plugins**, **Installer un plugin depuis un fichier** (le bouton +), et choisissez-le. Le plugin est installé une fois, dans l'IDE, pour tous les projets, et activé ; il peut toujours être désactivé dans un projet. Sa page a un bouton **Désinstaller**.
+
+Un plugin natif s'exécute dans l'IDE avec les droits de l'utilisateur : n'installez que des plugins de confiance. Sa bibliothèque n'est chargée qu'une fois le plugin activé, jamais avant.
+
+Le fichier est un zip de son manifeste et de la bibliothèque de chaque système, dans un dossier à son nom :
 
 ```
-.atelier/plugins/gltf-viewer/
-  plugin.json
-  gltf_viewer.dll        (libgltf_viewer.so sous Linux, libgltf_viewer.dylib sous macOS)
+plugin.json
+windows-x86_64/gltf_viewer.dll
+linux-x86_64/libgltf_viewer.so
+macos-aarch64/libgltf_viewer.dylib
+macos-x86_64/libgltf_viewer.dylib
 ```
 
 ```json
@@ -64,12 +72,11 @@ Un manifeste peut aussi apporter une bibliothèque dynamique, qui dessine dans l
   "name": "3D Model Viewer",
   "version": "0.1.0",
   "description": "glTF and GLB models shown in 3D, with their animations.",
-  "library": "gltf_viewer"
+  "library": "gltf_viewer",
+  "atelier": "0.2.0"
 }
 ```
 
-Chaque release d'Atelier apporte ses plugins natifs, dans le [dépôt des téléchargements](https://github.com/atelier-ide-org/releases/releases) : prenez `gltf-viewer-<os>-<arch>` dans la release `plugins/gltf-viewer/vX.Y.Z`, où X.Y.Z est **la version de l'IDE que vous utilisez**, extrayez-le dans `.atelier/plugins/gltf-viewer/` de votre projet, puis cliquez sur **Plugins**, **Recharger**, et activez-le. Depuis les sources, clonez-le dans le dossier `plugins/` de l'IDE : `plugins/gltf-viewer/install.ps1` (ou `install.sh`) le compile et l'installe.
+`library` est le nom de la bibliothèque, sans le préfixe ni l'extension du système, `atelier` la version d'Atelier pour laquelle elle a été compilée. Un plugin installé dans l'IDE va dans son dossier de données (`plugins/<plugin>/`) ; un projet peut aussi en contenir un dans `.atelier/plugins/<plugin>/`, les mêmes fichiers décompressés.
 
-`library` est le nom de la bibliothèque, sans le préfixe ni l'extension du système. Elle n'est chargée qu'une fois le plugin activé, jamais avant, et s'exécute dans l'IDE avec les droits de l'utilisateur : n'activez que des bibliothèques de confiance.
-
-Un plugin natif implémente le trait `Plugin` du crate `atelier-plugin-api` (`plugins/atelier-plugin-api`) et l'exporte avec `declare_plugin!`. Rust n'a pas d'ABI stable : la bibliothèque et l'IDE partagent egui, la bibliothèque doit donc être compilée par le même compilateur, pour la même cible et le même profil, avec les mêmes versions et fonctionnalités de leurs crates. Atelier le vérifie avant d'appeler la bibliothèque, et refuse celle qui a été compilée autrement. Un plugin cloné dans le dossier `plugins/` de l'IDE (ignoré par son git) rejoint son workspace : `cargo build --release --workspace` produit `target/release/gltf_viewer.dll` à côté d'`atelier-ide`. La CI de chaque plugin fait de même pour chaque release de l'IDE, avec son `rust-toolchain.toml`, et le publie sous `plugins/<plugin>/vX.Y.Z`.
+Un plugin natif implémente le trait `Plugin` du crate [`atelier-plugin-api`](https://github.com/atelier-ide-org/plugin-api) et l'exporte avec `declare_plugin!`. Rust n'a pas d'ABI stable : la bibliothèque et l'IDE partagent egui, la bibliothèque doit donc être compilée par le même compilateur, pour la même cible et le même profil, avec les mêmes versions et fonctionnalités de leurs crates. Atelier le vérifie avant d'appeler la bibliothèque, et refuse celle qui a été compilée autrement : un plugin ne se charge que dans la version d'Atelier pour laquelle il a été compilé. Pour en compiler un, clonez-le dans le dossier `plugins/` de l'IDE (ignoré par son git, membre de son workspace) ; son script `package` le compile avec l'IDE et produit son fichier. La CI de chaque plugin fait de même pour chaque release d'Atelier et le publie sous `plugins/<plugin>/vX.Y.Z`.

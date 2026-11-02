@@ -50,12 +50,20 @@ Arguments are passed as literal values, escaped for the shell. Commands run with
 
 ### Native plugins
 
-A manifest can also bring a dynamic library, which draws inside the IDE like a built-in plugin: it opens files in an editor tab (the 3D model viewer of `plugins/gltf-viewer`). Such a plugin goes in a folder of its own, with its manifest named `plugin.json` and its library next to it:
+A native plugin is a dynamic library that draws inside the IDE like a built-in plugin: it opens files in an editor tab, such as the 3D model viewer (glTF, GLB). It comes as **one file to install**, `<plugin>.atelier-plugin`.
+
+**To install one**, download its file from the release `plugins/<plugin>/vX.Y.Z` of the [repository of the downloads](https://github.com/atelier-ide-org/releases/releases), where X.Y.Z is **the version of Atelier you run**. Then click **Plugins**, **Install a plugin from a file** (the + button), and choose it. The plugin is installed once, in the IDE, for every project, and turned on; it can still be turned off in a project. Its page has an **Uninstall** button.
+
+A native plugin runs inside the IDE with the rights of the user: only install plugins you trust. Its library is loaded once the plugin is on, never before.
+
+The file is a zip of its manifest and of the library of each system, in a folder named after it:
 
 ```
-.atelier/plugins/gltf-viewer/
-  plugin.json
-  gltf_viewer.dll        (libgltf_viewer.so on Linux, libgltf_viewer.dylib on macOS)
+plugin.json
+windows-x86_64/gltf_viewer.dll
+linux-x86_64/libgltf_viewer.so
+macos-aarch64/libgltf_viewer.dylib
+macos-x86_64/libgltf_viewer.dylib
 ```
 
 ```json
@@ -64,12 +72,11 @@ A manifest can also bring a dynamic library, which draws inside the IDE like a b
   "name": "3D Model Viewer",
   "version": "0.1.0",
   "description": "glTF and GLB models shown in 3D, with their animations.",
-  "library": "gltf_viewer"
+  "library": "gltf_viewer",
+  "atelier": "0.2.0"
 }
 ```
 
-Each release of Atelier carries its native plugins, in the [repository of the downloads](https://github.com/atelier-ide-org/releases/releases): take `gltf-viewer-<os>-<arch>` from the release `plugins/gltf-viewer/vX.Y.Z`, where X.Y.Z is **the version of the IDE you run**, extract it into `.atelier/plugins/gltf-viewer/` of your project, then click **Plugins**, **Reload**, and enable it. From the sources, clone it into the `plugins/` folder of the IDE: `plugins/gltf-viewer/install.ps1` (or `install.sh`) builds and installs it.
+`library` is the name of the library without the prefix and extension of the system, `atelier` the version of Atelier it was built for. A plugin installed in the IDE goes in its data folder (`plugins/<plugin>/`); a project can also hold one in `.atelier/plugins/<plugin>/`, the same files unzipped.
 
-`library` is the name of the library without the prefix and extension of the system. It is loaded once the plugin is enabled, never before, and runs inside the IDE with the rights of the user: only enable libraries you trust.
-
-A native plugin implements the `Plugin` trait of the `atelier-plugin-api` crate (`plugins/atelier-plugin-api`) and exports it with `declare_plugin!`. Rust has no stable ABI: the library and the IDE share egui, so the library must be built by the same compiler, for the same target and profile, from the same versions and features of their crates. Atelier checks it before calling the library, and refuses one built otherwise. A plugin cloned into the `plugins/` folder of the IDE (ignored by its git) joins its workspace: `cargo build --release --workspace` builds `target/release/gltf_viewer.dll` beside `atelier-ide`. The CI of each plugin does the same for each release of the IDE, with its `rust-toolchain.toml`, and publishes it as `plugins/<plugin>/vX.Y.Z`.
+A native plugin implements the `Plugin` trait of the [`atelier-plugin-api`](https://github.com/atelier-ide-org/plugin-api) crate and exports it with `declare_plugin!`. Rust has no stable ABI: the library and the IDE share egui, so the library must be built by the same compiler, for the same target and profile, from the same versions and features of their crates. Atelier checks it before calling the library, and refuses one built otherwise: a plugin loads only in the version of Atelier it was built for. To build one, clone it into the `plugins/` folder of the IDE (ignored by its git, a member of its workspace); its `package` script builds it with the IDE and makes its file. The CI of each plugin does the same for each release of Atelier and publishes it as `plugins/<plugin>/vX.Y.Z`.
