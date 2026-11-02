@@ -32,7 +32,7 @@ Cette pull request est poussée par GitHub Actions, donc la CI ne tourne pas des
 
 Le workflow **Release** (`.github/workflows/release.yml`) compile l'IDE et son lanceur pour Windows, Linux et macOS (Intel et Apple Silicon) avec `.github/workflows/build.yml`, ainsi que l'installateur Windows. Grâce au cache, seul le code d'Atelier est recompilé. La release est ensuite publiée à deux endroits :
 
-- **[`atelier-ide-org/releases`](https://github.com/atelier-ide-org/releases)**, le dépôt public des téléchargements, où le lanceur cherche les mises à jour. Le code vit dans `atelier-ide-org/app`, qui deviendra privé. Cette étape demande le secret `RELEASES_TOKEN` dans `app` : un jeton qui peut écrire le contenu de `releases` (un jeton fine-grained limité à ce dépôt, ou une GitHub App de l'organisation). Sans lui, le workflow s'arrête avant de rien publier.
+- **[`atelier-ide-org/releases`](https://github.com/atelier-ide-org/releases)**, le dépôt public des téléchargements, sous le tag `app/vX.Y.Z`, où le lanceur cherche les mises à jour (la dernière release dont le tag commence par `app/`). Le code vit dans `atelier-ide-org/app`, qui deviendra privé. Cette étape demande le secret `RELEASES_TOKEN` dans `app` : un jeton qui peut écrire le contenu de `releases` (un jeton fine-grained limité à ce dépôt, ou une GitHub App de l'organisation). Sans lui, le workflow s'arrête avant de rien publier.
 - **`atelier-ide-org/app`**, où `knope release` crée le tag `vX.Y.Z` et publie les notes du changelog. Les lanceurs installés avant le déménagement y cherchent encore, jusqu'à ce qu'ils se mettent à jour eux-mêmes (voir `MIGRATION.md`).
 
 La release de `releases` reste un brouillon tant que tous les fichiers ne sont pas envoyés et que `knope` n'a pas fini, si bien que le lanceur n'en voit jamais une incomplète.
@@ -44,9 +44,8 @@ La release de `releases` reste un brouillon tant que tous les fichiers ne sont p
 | `atelier-setup-windows-x86_64.exe` | L'installateur Windows |
 | `atelier-<os>-<arch>` | Le lanceur, téléchargé une fois sur Linux et macOS |
 | `atelier-ide-<os>-<arch>.zip` / `.tar.gz` | L'archive qu'installe le lanceur : l'IDE et le prochain lanceur |
-| `<plugin>-<os>-<arch>.zip` / `.tar.gz` | Un plugin natif (`gltf-viewer`) : son `plugin.json` et sa bibliothèque, à extraire dans `.atelier/plugins/<plugin>/` |
 | `SHA256SUMS` | Les sommes de contrôle que vérifie le lanceur |
 
-L'IDE n'attend jamais ses plugins. Un plugin natif ne se charge que dans un IDE compilé comme lui : le workflow **Release** de chaque dépôt de plugin (`plugin-<nom>`) prend le code de l'IDE au tag de la release, place le plugin dans son dossier `plugins/`, lance la commande qui a compilé l'IDE, et ajoute ses fichiers (et `<plugin>-SHA256SUMS`) à la release, quelques heures plus tard au plus. Le compilateur de l'IDE est fixé par `rust-toolchain.toml`, que les plugins utilisent aussi.
+L'IDE n'attend jamais ses plugins. Un plugin natif ne se charge que dans un IDE compilé comme lui : le workflow **Release** de chaque dépôt de plugin (`plugin-<nom>`) prend le code de l'IDE au tag de la release, place le plugin dans son dossier `plugins/`, lance la commande qui a compilé l'IDE, et publie ses fichiers sous la release `plugins/<plugin>/vX.Y.Z` du même dépôt, quelques heures plus tard au plus : `<plugin>-<os>-<arch>.zip` / `.tar.gz` (son `plugin.json` et sa bibliothèque, à extraire dans `.atelier/plugins/<plugin>/`) et `<plugin>-SHA256SUMS`. Elle n'est jamais marquée comme la dernière release, qui reste celle de l'IDE : les liens de téléchargement du site y mènent. Le compilateur de l'IDE est fixé par `rust-toolchain.toml`, que les plugins utilisent aussi.
 
 Le workflow **Build** se lance aussi à la main, pour compiler sans publier. L'organisation et le dépôt doivent autoriser « Allow GitHub Actions to create and approve pull requests » (Settings › Actions › General) pour que la pull request de release puisse être créée.
