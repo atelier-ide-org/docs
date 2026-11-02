@@ -5,8 +5,8 @@ name: Docs
 #
 # The pages and cards of the plugins and languages live in the code of the IDE, in their `doc`
 # folders (see .vitepress/catalog.ts): the code of atelier-ide-org/app is cloned into `app/`, with
-# its submodules (the native plugins). `app` is private: the secret APP_READ_TOKEN is a token that
-# may read its contents. Every night, the site is built again, to follow the code.
+# its submodules (the native plugins). `app` and some plugins are private: the secret READ_TOKEN
+# is a token that may read their contents. Every night, the site is built again, to follow the code.
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
         with:
           repository: atelier-ide-org/app
           path: app
-          token: ${{ secrets.APP_READ_TOKEN || github.token }}
+          token: ${{ secrets.READ_TOKEN || github.token }}
           submodules: recursive
           fetch-depth: 0
       - uses: oven-sh/setup-bun@v2
