@@ -2,7 +2,7 @@
 // (atelier-ide-org/app), so that the docs follow the code:
 //
 //   src/plugins/builtins/<plugin>/doc/   (or src/languages/<language>/doc/, or plugins/<plugin>/doc/
-//                                         for a native plugin, a submodule of the IDE)
+//                                         for a native plugin, cloned into the IDE)
 //     en-US.md   the page of the plugin, at /plugins/<plugin> (or /languages/<language>)
 //     fr-FR.md   its French page, at /fr/plugins/<plugin>
 //
@@ -26,12 +26,12 @@ import { parse } from 'yaml'
 export const docsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 /** The code of the IDE: `ATELIER_APP`, else a clone of atelier-ide-org/app next to this
- * repository (`../app`), with its submodules. */
+ * repository (`../app`), with the native plugins cloned into its `plugins/` folder. */
 export const repoRoot = path.resolve(process.env.ATELIER_APP ?? path.join(docsRoot, '../app'))
 if (!fs.existsSync(path.join(repoRoot, 'src/plugins/builtins'))) {
   throw new Error(
     `The code of Atelier is not in ${repoRoot}: clone atelier-ide-org/app there ` +
-      '(git clone --recursive), or set ATELIER_APP to its folder.',
+      '(and the native plugins into its plugins/ folder), or set ATELIER_APP to its folder.',
   )
 }
 
@@ -73,7 +73,7 @@ export const watched = roots.map((r) => `${repoRoot}/${r.dir}/**/doc/*.md`.repla
 /** Every `doc` folder under `dir`, with the plugin folders that hold it, outermost first. */
 function docFolders(dir: string, chain: string[] = []): { folder: string; chain: string[] }[] {
   const out: { folder: string; chain: string[] }[] = []
-  // `plugins/` holds the submodules of the native plugins, and a build of them.
+  // `plugins/` holds the clones of the native plugins, and a build of them.
   if (!fs.existsSync(dir) || ['target', 'node_modules', '.git'].includes(path.basename(dir))) {
     return out
   }

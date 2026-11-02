@@ -2,10 +2,11 @@
 
 The documentation of [Atelier IDE](https://github.com/atelier-ide-org/releases), in English and French: <https://atelier-ide-org.github.io/docs/>.
 
-A [VitePress](https://vitepress.dev) site built with [Bun](https://bun.sh). The pages of the plugins and languages are not here: they live next to their code, in the `doc` folder of each plugin of the IDE (`atelier-ide-org/app`) and of each native plugin (`plugin-<name>`). Clone the IDE next to this repository:
+A [VitePress](https://vitepress.dev) site built with [Bun](https://bun.sh). The pages of the plugins and languages are not here: they live next to their code, in the `doc` folder of each plugin of the IDE (`atelier-ide-org/app`) and of each native plugin (`plugin-<name>`). Clone the IDE next to this repository, and the native plugins into its `plugins/` folder:
 
 ```bash
-git clone --recursive git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/plugin-gltf-viewer.git app/plugins/gltf-viewer
 git clone git@github.com:atelier-ide-org/docs.git
 cd docs
 bun install

@@ -20,7 +20,7 @@ function pages(section: Section, prefix: string): DefaultTheme.SidebarItem[] {
 }
 
 /** "Edit this page" opens the file of the page: in this repository, in the repository of a
- * native plugin (`plugins/<plugin>/…`, a submodule of the IDE), or in the code of the IDE. The
+ * native plugin (`plugins/<plugin>/…`, cloned into the IDE), or in the code of the IDE. The
  * pattern is sent to the browser on its own: it cannot use `repo`. */
 function editLink(text: string): DefaultTheme.EditLink {
   return {
@@ -138,7 +138,7 @@ export default defineConfig({
     const source = page.params?.source
     if (!source) return
     try {
-      // From the folder of the file: a native plugin is a submodule, with a history of its own.
+      // From the folder of the file: a native plugin is a repository of its own.
       const file = path.join(repoRoot, source)
       const out = execFileSync('git', ['log', '-1', '--format=%at', '--', path.basename(file)], {
         cwd: path.dirname(file),

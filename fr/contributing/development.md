@@ -49,7 +49,7 @@ Dans le code, un texte s'écrit par sa clé : `tr!("save")`, ou `trf!("files_cou
 | `src/bin/atelier.rs`, `src/bin/atelier/` | Le lanceur (bootstrap) : mises à jour, fenêtre de démarrage |
 | `installer/` | L'installateur Windows (Inno Setup) et la commande `atelier` |
 | `build.rs` | Rassemble les icônes et les langues, et donne leur nom et leur icône aux exécutables Windows |
-| `plugins/` | Les plugins natifs : des sous-modules git (`gltf-viewer`, depuis atelier-ide-org/plugin-gltf-viewer), compilés avec l'IDE |
+| `plugins/` | Ignoré par git : les plugins natifs clonés ici (dépôts `plugin-<nom>`) rejoignent le workspace, pour être compilés comme l'IDE |
 
 ## Documentation
 
@@ -58,7 +58,8 @@ La documentation est un site [VitePress](https://vitepress.dev) dans son propre 
 Elle lit les pages des plugins dans le code de l'IDE : clonez les deux côte à côte (ou indiquez le dossier de l'IDE dans `ATELIER_APP`).
 
 ```bash
-git clone --recursive git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/plugin-gltf-viewer.git app/plugins/gltf-viewer
 git clone git@github.com:atelier-ide-org/docs.git
 cd docs
 bun install

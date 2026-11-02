@@ -49,7 +49,7 @@ In the code, a text is named by its key: `tr!("save")`, or `trf!("files_count", 
 | `src/bin/atelier.rs`, `src/bin/atelier/` | The launcher (bootstrap): updates, startup window |
 | `installer/` | The Windows installer (Inno Setup) and the `atelier` command |
 | `build.rs` | Collects the icons and the locales, and gives the Windows executables their name and icon |
-| `plugins/` | Native plugins: git submodules (`gltf-viewer`, from atelier-ide-org/plugin-gltf-viewer), built with the IDE |
+| `plugins/` | Ignored by git: the native plugins cloned here (`plugin-<name>` repositories) join the workspace, to be built like the IDE |
 
 ## Documentation
 
@@ -58,7 +58,8 @@ The documentation is a [VitePress](https://vitepress.dev) site in its own reposi
 It reads the pages of the plugins in the code of the IDE: clone both side by side (or set `ATELIER_APP` to the folder of the IDE).
 
 ```bash
-git clone --recursive git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/app.git
+git clone git@github.com:atelier-ide-org/plugin-gltf-viewer.git app/plugins/gltf-viewer
 git clone git@github.com:atelier-ide-org/docs.git
 cd docs
 bun install
