@@ -14,4 +14,4 @@ bun run dev       # http://localhost:5173/docs/
 bun run build     # checks the links too
 ```
 
-`ATELIER_APP` points to the IDE elsewhere. The CI clones it into `app/` with the secret `READ_TOKEN` (it reads `app` and the private plugins), deploys `main` to GitHub Pages, and builds the site again every night to follow the code.
+`ATELIER_APP` points to the IDE elsewhere. The CI clones it into `app/` (and the native plugins into `app/plugins/`), deploys `main` to GitHub Pages, and builds the site again every night to follow the code.
