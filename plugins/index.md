@@ -31,7 +31,7 @@ The coloring of a language comes with its plugin (JavaScript, Rust, Java, Markdo
 
 External plugins are JSON manifests of a project, which bring commands or a native library. They are enabled for each project separately, and no external plugin runs when it is loaded.
 
-To try one, copy `examples/plugins/rust-tools.json` to `.atelier/plugins/rust-tools.json` in your project, click **Plugins**, then **Reload**, and enable the extension.
+To try one, save this manifest as `.atelier/plugins/rust-tools.json` in your project, click **Plugins**, then **Reload**, and enable the extension:
 
 ```json
 {
@@ -50,9 +50,9 @@ Arguments are passed as literal values, escaped for the shell. Commands run with
 
 ### Native plugins
 
-A native plugin is a dynamic library that draws inside the IDE like a built-in plugin: it opens files in an editor tab, such as the 3D model viewer (glTF, GLB). It comes as **one file to install**, `<plugin>.atelier-plugin`.
+A native plugin is a dynamic library that draws inside the IDE like a built-in plugin: it opens files in an editor tab (the 3D model viewer, Microsoft Office documents) or brings a tool window (the database viewer). It comes as **one file to install**, `<plugin>.atelier-plugin`.
 
-**To install one**, download its file from the release `plugins/<plugin>/vX.Y.Z` of the [repository of the downloads](https://github.com/atelier-ide-org/releases/releases), where X.Y.Z is **the version of Atelier you run**. Then click **Plugins**, **Install a plugin from a file** (the + button), and choose it. The plugin is installed once, in the IDE, for every project, and turned on; it can still be turned off in a project. Its page has an **Uninstall** button.
+**To install one**, click **Plugins**, then the **Available** tab: it lists the plugins of the [repository of the downloads](https://github.com/atelier-ide-org/releases/releases) that this Atelier can load, with an **Install** button, and **Update** when a newer version is out. A file downloaded by hand (the release `plugins/<plugin>/vX.Y.Z`) installs with **Install a plugin from a file** (the + button). The plugin is installed once, in the IDE, for every project, and turned on; it can still be turned off in a project. Its page has an **Uninstall** button.
 
 A native plugin runs inside the IDE with the rights of the user: only install plugins you trust. Its library is loaded once the plugin is on, never before.
 
@@ -70,13 +70,13 @@ macos-x86_64/libgltf_viewer.dylib
 {
   "id": "gltf-viewer",
   "name": "3D Model Viewer",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "glTF and GLB models shown in 3D, with their animations.",
   "library": "gltf_viewer",
-  "atelier": "0.2.0"
+  "abi": 2
 }
 ```
 
-`library` is the name of the library without the prefix and extension of the system, `atelier` the version of Atelier it was built for. A plugin installed in the IDE goes in its data folder (`plugins/<plugin>/`); a project can also hold one in `.atelier/plugins/<plugin>/`, the same files unzipped.
+`library` is the name of the library without the prefix and extension of the system, `abi` the version of the plugin interface it was built for. A plugin installed in the IDE goes in its data folder (`plugins/<plugin>/`); a project can also hold one in `.atelier/plugins/<plugin>/`, the same files unzipped.
 
-A native plugin implements the `Plugin` trait of the [`atelier-plugin-api`](https://github.com/atelier-ide-org/api) crate and exports it with `declare_plugin!`. Rust has no stable ABI: the library and the IDE share egui, so the library must be built by the same compiler, for the same target and profile, from the same versions and features of their crates. Atelier checks it before calling the library, and refuses one built otherwise: a plugin loads only in the version of Atelier it was built for. To build one, clone it into the `plugins/` folder of the IDE (ignored by its git, a member of its workspace); its `package` script builds it with the IDE and makes its file. The CI of each plugin does the same for each release of Atelier and publishes it as `plugins/<plugin>/vX.Y.Z`.
+A native plugin talks to the IDE through a C interface only, the [`atelier-plugin-api`](https://github.com/atelier-ide-org/api) crate: it implements its `Plugin` trait and exports it with `export_plugin!`. It draws with **its own egui**: for each of its surfaces (the preview of a file, a tool window), the IDE sends the input of the frame, and paints the meshes and textures the plugin gives back, with the look, the fonts and the icons of the IDE; a surface may also paint with OpenGL. So a plugin builds alone, with any Rust compiler, and loads in every version of Atelier that reads the version of the interface it was built for (2 since Atelier 0.3). Each plugin has a repository of its own (`plugin-<name>`, also a submodule `plugins/<name>` of the IDE): raising the version of its `Cargo.toml` publishes it as `plugins/<plugin>/vX.Y.Z`.

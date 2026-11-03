@@ -5,7 +5,7 @@
 Il faut Rust stable et une chaîne de compilation native (sous Windows, les Build Tools de Visual Studio avec la charge de travail C++).
 
 ```bash
-cargo run -- examples/demo   # l'IDE sur le projet de démonstration multilangage
+cargo run -- test/fixtures/demo   # l'IDE sur le projet multilangage des tests
 cargo fmt --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
@@ -17,7 +17,7 @@ La CI lance les mêmes vérifications sous Windows et Linux pour chaque pull req
 
 ```bash
 cargo dev                    # alias de : cargo run -- --dev
-cargo dev -- examples/demo
+cargo dev -- test/fixtures/demo
 ```
 
 Le processus surveille `src/`, `Cargo.toml` et `Cargo.lock`. À chaque modification, il recompile l'IDE dans `target/hot` ; si la compilation réussit, la fenêtre est remplacée par la nouvelle version, en gardant le projet, les onglets, le texte non enregistré, l'onglet actif, les panneaux et la position de la fenêtre. En cas d'erreur de compilation, les messages s'affichent dans la console et l'IDE en cours continue de tourner. Le shell du terminal intégré redémarre à chaque rechargement. Fermer la fenêtre arrête le mode développement.
@@ -49,19 +49,17 @@ Dans le code, un texte s'écrit par sa clé : `tr!("save")`, ou `trf!("files_cou
 | `src/bin/atelier.rs`, `src/bin/atelier/` | Le lanceur (bootstrap) : mises à jour, fenêtre de démarrage |
 | `installer/` | L'installateur Windows (Inno Setup) et la commande `atelier` |
 | `build.rs` | Rassemble les icônes et les langues, et donne leur nom et leur icône aux exécutables Windows |
-| `plugins/` | Ignoré par git : les plugins natifs clonés ici (dépôts `plugin-<nom>`) rejoignent le workspace, pour être compilés comme l'IDE |
+| `api/`, `plugins/`, `docs/` | Des sous-modules, dépôts à part entière : l'interface des plugins natifs (`atelier-ide-org/api`), les plugins natifs (`plugin-<nom>`, chacun compilé seul avec `api`, jamais avec l'IDE) et cette documentation |
 
 ## Documentation
 
 La documentation est un site [VitePress](https://vitepress.dev) dans son propre dépôt, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), construit avec [Bun](https://bun.sh), en anglais (racine) et en français (`fr/`, mêmes chemins). Chaque page existe dans les deux langues.
 
-Elle lit les pages des plugins dans le code de l'IDE : clonez les deux côte à côte (ou indiquez le dossier de l'IDE dans `ATELIER_APP`).
+Elle lit les pages des plugins dans le code de l'IDE, dont elle est le sous-module `docs/` (ou indiquez le dossier de l'IDE dans `ATELIER_APP`).
 
 ```bash
-git clone git@github.com:atelier-ide-org/app.git
-git clone git@github.com:atelier-ide-org/plugin-gltf-viewer.git app/plugins/gltf-viewer
-git clone git@github.com:atelier-ide-org/docs.git
-cd docs
+git clone --recurse-submodules git@github.com:atelier-ide-org/app.git
+cd app/docs
 bun install
 bun run dev       # http://localhost:5173/docs/
 bun run build     # vérifie aussi les liens
