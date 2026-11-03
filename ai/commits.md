@@ -1,6 +1,6 @@
 # Commits by AI
 
-The MCP server offers commands (MCP prompts) for commits that follow the conventions of the repository. In Claude Code they are `/mcp__atelier__commit`, `/mcp__atelier__rework-commit`…
+The MCP server offers commands (MCP prompts) for commits that follow the conventions of the repository. In Claude Code they are `/mcp__atelier__commit`, `/mcp__atelier__rework-commit`, `/mcp__atelier__pr`…
 
 ## `commit`
 
@@ -37,3 +37,13 @@ Safeguards:
 - **commits already pushed are refused**, unless the user explicitly agrees (`allowPushed`);
 - the old head stays under `refs/atelier/backup/<date>` (`git reset --hard <ref>` puts everything back);
 - never a co-author, never a push.
+
+## `pr`
+
+`/pr` (optionally with the base branch, by default the default branch of `origin`) opens the pull request of the current branch.
+
+`git_pr_plan` gives the commits of the branch against the base, each **checked against the rules of the repository** (the same as for `commit`: its conventions, no co-author), the stat and the diff, and how to write the title and the description. A commit that breaks the rules blocks the pull request: the agent tells the user and fixes it with `rework-commit` first.
+
+The agent then writes a title, written as a commit subject of the repository, and a description of **exactly what the branch does**: what changes and why, the changes by subject, how it was tested when the commits say so; nothing the diff does not show.
+
+`git_pull_request` checks the commits and the title again, removes from the description every `Co-authored-by` line and attribution (“Generated with…”, 🤖), pushes the branch (never forced) and opens the pull request with `gh`, the GitHub command line, which must be installed and signed in.

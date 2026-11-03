@@ -1,6 +1,6 @@
 # Commits par l'IA
 
-Le serveur MCP propose des commandes (des « prompts » MCP) pour des commits qui suivent les conventions du dépôt. Dans Claude Code, ce sont `/mcp__atelier__commit`, `/mcp__atelier__rework-commit`…
+Le serveur MCP propose des commandes (des « prompts » MCP) pour des commits qui suivent les conventions du dépôt. Dans Claude Code, ce sont `/mcp__atelier__commit`, `/mcp__atelier__rework-commit`, `/mcp__atelier__pr`…
 
 ## `commit`
 
@@ -37,3 +37,13 @@ Garde-fous :
 - **commits déjà poussés refusés**, sauf accord explicite de l'utilisateur (`allowPushed`) ;
 - l'ancienne tête reste sous `refs/atelier/backup/<date>` (`git reset --hard <ref>` remet tout en place) ;
 - jamais de co-auteur, jamais de push.
+
+## `pr`
+
+`/pr` (avec, au besoin, la branche de base, par défaut la branche par défaut d'`origin`) ouvre la pull request de la branche courante.
+
+`git_pr_plan` donne les commits de la branche par rapport à la base, chacun **vérifié selon les règles du dépôt** (les mêmes que pour `commit` : ses conventions, aucun co-auteur), le résumé et le diff, et comment écrire le titre et la description. Un commit qui enfreint les règles bloque la pull request : l'agent le dit à l'utilisateur et le corrige d'abord avec `rework-commit`.
+
+L'agent écrit ensuite un titre, rédigé comme un sujet de commit du dépôt, et une description de **ce que fait exactement la branche** : ce qui change et pourquoi, les changements par sujet, comment c'est testé quand les commits le disent ; rien que le diff ne montre pas.
+
+`git_pull_request` vérifie à nouveau les commits et le titre, retire de la description toute ligne `Co-authored-by` et toute attribution (« Generated with… », 🤖), pousse la branche (jamais en force) et ouvre la pull request avec `gh`, la ligne de commande de GitHub, qui doit être installée et connectée.
