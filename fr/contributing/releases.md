@@ -33,7 +33,7 @@ Cette pull request est poussée par GitHub Actions, donc la CI ne tourne pas des
 Le workflow **Release** (`.github/workflows/release.yml`) compile l'IDE et son lanceur pour Windows, Linux et macOS (Intel et Apple Silicon) avec `.github/workflows/build.yml`, ainsi que l'installateur Windows. Grâce au cache, seul le code d'Atelier est recompilé. La release est ensuite publiée à deux endroits :
 
 - **[`atelier-ide-org/releases`](https://github.com/atelier-ide-org/releases)**, le dépôt public des téléchargements, sous le tag `app/vX.Y.Z`, où le lanceur cherche les mises à jour (la dernière release dont le tag commence par `app/`). Cette étape demande `ATELIER_RELEASES`, un secret de l'organisation : un jeton qui peut écrire le contenu de `releases` et d'`api`. Sans lui, le workflow s'arrête avant de rien publier.
-- **`atelier-ide-org/app`**, où `knope release` crée le tag `vX.Y.Z` et publie les notes du changelog. Les lanceurs installés avant le déménagement y cherchent encore, jusqu'à ce qu'ils se mettent à jour eux-mêmes (voir `MIGRATION.md`).
+- **`atelier-ide-org/app`**, où `knope release` crée le tag `vX.Y.Z` et publie les notes du changelog. Les lanceurs installés avant le déménagement y cherchent encore, jusqu'à ce qu'ils se mettent à jour eux-mêmes.
 
 La release de `releases` reste un brouillon tant que tous les fichiers ne sont pas envoyés et que `knope` n'a pas fini, si bien que le lanceur n'en voit jamais une incomplète.
 

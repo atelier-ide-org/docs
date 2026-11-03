@@ -33,7 +33,7 @@ That pull request is pushed by GitHub Actions, so the CI does not run on it: an 
 The **Release** workflow (`.github/workflows/release.yml`) builds the IDE and its launcher for Windows, Linux and macOS (Intel and Apple Silicon) with `.github/workflows/build.yml`, along with the Windows installer. Thanks to the cache, only the code of Atelier is rebuilt. The release is then published in two places:
 
 - **[`atelier-ide-org/releases`](https://github.com/atelier-ide-org/releases)**, the public repository of the downloads, as the release `app/vX.Y.Z`, where the launcher looks for updates (the latest release whose tag starts with `app/`). This step needs `ATELIER_RELEASES`, a secret of the organization: a token allowed to write the contents of `releases` and `api`. Without it, the workflow stops before publishing anything.
-- **`atelier-ide-org/app`**, where `knope release` creates the `vX.Y.Z` tag and publishes the notes of the changelog. The launchers installed before the move still look there, until they update themselves (see `MIGRATION.md`).
+- **`atelier-ide-org/app`**, where `knope release` creates the `vX.Y.Z` tag and publishes the notes of the changelog. The launchers installed before the move still look there, until they update themselves.
 
 The release of `releases` stays a draft until every file is uploaded and `knope` is done, so the launcher never sees an incomplete one.
 
