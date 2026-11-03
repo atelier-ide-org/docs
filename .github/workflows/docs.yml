@@ -4,9 +4,9 @@ name: Docs
 # https://atelier-ide-org.github.io/docs/
 #
 # The pages and cards of the plugins and languages live in the code of the IDE, in their `doc`
-# folders (see .vitepress/catalog.ts): the code of atelier-ide-org/app is cloned into `app/`, and
-# each native plugin (plugin-<name>) into `app/plugins/<name>`, as to build it. Every night, the
-# site is built again, to follow the code.
+# folders (see .vitepress/catalog.ts): the code of atelier-ide-org/app is cloned into `app/`, with
+# its submodules `plugins/<name>`, the native plugins (plugin-<name>). Every night, the site is
+# built again, to follow the code.
 
 on:
   push:
@@ -39,12 +39,15 @@ jobs:
           ref: ${{ vars.APP_REF || 'main' }}
           path: app
           fetch-depth: 0
-      # The native plugins, where the IDE builds them: in its `plugins/` folder.
-      - uses: actions/checkout@v7
-        with:
-          repository: atelier-ide-org/plugin-gltf-viewer
-          path: app/plugins/gltf-viewer
-          fetch-depth: 0
+      # The native plugins: the submodules `plugins/<name>` of the IDE, with their history (the
+      # dates of their pages). One that cannot be cloned is left out of the catalog.
+      - name: Native plugins
+        working-directory: app
+        run: |
+          for plugin in $(git config -f .gitmodules --get-regexp '^submodule\.plugins/.*\.path$' | cut -d' ' -f2); do
+            git submodule update --init "$plugin" || echo "::warning::$plugin could not be cloned"
+            git -C "$plugin" fetch --unshallow 2>/dev/null || true
+          done
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0

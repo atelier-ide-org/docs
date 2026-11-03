@@ -31,7 +31,7 @@ La coloration d'un langage vient de son plugin (JavaScript, Rust, Java, Markdown
 
 Les plugins externes sont des manifestes JSON propres à un projet, qui apportent des commandes ou une bibliothèque native. Ils s'activent projet par projet, et aucun plugin externe ne s'exécute à son chargement.
 
-Pour en essayer un, copiez `examples/plugins/rust-tools.json` dans `.atelier/plugins/rust-tools.json` de votre projet, cliquez sur **Plugins**, puis **Recharger**, et activez l'extension.
+Pour en essayer un, enregistrez ce manifeste sous `.atelier/plugins/rust-tools.json` dans votre projet, cliquez sur **Plugins**, puis **Recharger**, et activez l'extension :
 
 ```json
 {
@@ -50,9 +50,9 @@ Les arguments sont transmis comme des valeurs littérales, échappées pour le s
 
 ### Plugins natifs
 
-Un plugin natif est une bibliothèque dynamique qui dessine dans l'IDE comme un plugin intégré : il ouvre des fichiers dans un onglet de l'éditeur, comme la visionneuse de modèles 3D (glTF, GLB). Il se présente comme **un fichier à installer**, `<plugin>.atelier-plugin`.
+Un plugin natif est une bibliothèque dynamique qui dessine dans l'IDE comme un plugin intégré : il ouvre des fichiers dans un onglet de l'éditeur (la visionneuse de modèles 3D, les documents Microsoft Office) ou apporte une fenêtre d'outils (l'explorateur de bases de données). Il se présente comme **un fichier à installer**, `<plugin>.atelier-plugin`.
 
-**Pour en installer un**, téléchargez son fichier dans la release `plugins/<plugin>/vX.Y.Z` du [dépôt des téléchargements](https://github.com/atelier-ide-org/releases/releases), où X.Y.Z est **la version d'Atelier que vous utilisez**. Cliquez ensuite sur **Plugins**, **Installer un plugin depuis un fichier** (le bouton +), et choisissez-le. Le plugin est installé une fois, dans l'IDE, pour tous les projets, et activé ; il peut toujours être désactivé dans un projet. Sa page a un bouton **Désinstaller**.
+**Pour en installer un**, cliquez sur **Plugins**, puis sur l'onglet **Disponibles** : il liste les plugins du [dépôt des téléchargements](https://github.com/atelier-ide-org/releases/releases) que cet Atelier sait charger, avec un bouton **Installer**, et **Mettre à jour** quand une version plus récente est sortie. Un fichier téléchargé à la main (la release `plugins/<plugin>/vX.Y.Z`) s'installe avec **Installer un plugin depuis un fichier** (le bouton +). Le plugin est installé une fois, dans l'IDE, pour tous les projets, et activé ; il peut toujours être désactivé dans un projet. Sa page a un bouton **Désinstaller**.
 
 Un plugin natif s'exécute dans l'IDE avec les droits de l'utilisateur : n'installez que des plugins de confiance. Sa bibliothèque n'est chargée qu'une fois le plugin activé, jamais avant.
 
@@ -70,13 +70,13 @@ macos-x86_64/libgltf_viewer.dylib
 {
   "id": "gltf-viewer",
   "name": "3D Model Viewer",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "description": "glTF and GLB models shown in 3D, with their animations.",
   "library": "gltf_viewer",
-  "atelier": "0.2.0"
+  "abi": 2
 }
 ```
 
-`library` est le nom de la bibliothèque, sans le préfixe ni l'extension du système, `atelier` la version d'Atelier pour laquelle elle a été compilée. Un plugin installé dans l'IDE va dans son dossier de données (`plugins/<plugin>/`) ; un projet peut aussi en contenir un dans `.atelier/plugins/<plugin>/`, les mêmes fichiers décompressés.
+`library` est le nom de la bibliothèque, sans le préfixe ni l'extension du système, `abi` la version de l'interface des plugins pour laquelle elle a été compilée. Un plugin installé dans l'IDE va dans son dossier de données (`plugins/<plugin>/`) ; un projet peut aussi en contenir un dans `.atelier/plugins/<plugin>/`, les mêmes fichiers décompressés.
 
-Un plugin natif implémente le trait `Plugin` du crate [`atelier-plugin-api`](https://github.com/atelier-ide-org/api) et l'exporte avec `declare_plugin!`. Rust n'a pas d'ABI stable : la bibliothèque et l'IDE partagent egui, la bibliothèque doit donc être compilée par le même compilateur, pour la même cible et le même profil, avec les mêmes versions et fonctionnalités de leurs crates. Atelier le vérifie avant d'appeler la bibliothèque, et refuse celle qui a été compilée autrement : un plugin ne se charge que dans la version d'Atelier pour laquelle il a été compilé. Pour en compiler un, clonez-le dans le dossier `plugins/` de l'IDE (ignoré par son git, membre de son workspace) ; son script `package` le compile avec l'IDE et produit son fichier. La CI de chaque plugin fait de même pour chaque release d'Atelier et le publie sous `plugins/<plugin>/vX.Y.Z`.
+Un plugin natif ne parle à l'IDE qu'au travers d'une interface C, le crate [`atelier-plugin-api`](https://github.com/atelier-ide-org/api) : il implémente son trait `Plugin` et l'exporte avec `export_plugin!`. Il dessine avec **son propre egui** : pour chacune de ses surfaces (l'aperçu d'un fichier, une fenêtre d'outils), l'IDE lui envoie les entrées de l'image et peint les maillages et les textures qu'il rend, avec l'apparence, les polices et les icônes de l'IDE ; une surface peut aussi peindre en OpenGL. Un plugin se compile donc seul, avec n'importe quel compilateur Rust, et se charge dans toutes les versions d'Atelier qui lisent la version de l'interface pour laquelle il a été compilé (2 depuis Atelier 0.3). Chaque plugin a son propre dépôt (`plugin-<nom>`, aussi un sous-module `plugins/<nom>` de l'IDE) : monter la version de son `Cargo.toml` le publie sous `plugins/<plugin>/vX.Y.Z`.

@@ -5,7 +5,7 @@
 You need stable Rust and a native toolchain (on Windows, the Visual Studio Build Tools with the C++ workload).
 
 ```bash
-cargo run -- examples/demo   # the IDE on the multi-language demo project
+cargo run -- test/fixtures/demo   # the IDE on the multi-language project of the tests
 cargo fmt --check
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked
@@ -17,7 +17,7 @@ The CI runs the same checks on Windows and Linux for every pull request.
 
 ```bash
 cargo dev                    # alias of: cargo run -- --dev
-cargo dev -- examples/demo
+cargo dev -- test/fixtures/demo
 ```
 
 The process watches `src/`, `Cargo.toml` and `Cargo.lock`. On each change it rebuilds the IDE in `target/hot`; when the build succeeds, the window is replaced by the new version, keeping the project, the tabs, unsaved text, the active tab, the panels and the window position. On a build error, the messages show in the console and the running IDE goes on. The shell of the built-in terminal restarts at each reload. Closing the window stops dev mode.
@@ -49,19 +49,17 @@ In the code, a text is named by its key: `tr!("save")`, or `trf!("files_count", 
 | `src/bin/atelier.rs`, `src/bin/atelier/` | The launcher (bootstrap): updates, startup window |
 | `installer/` | The Windows installer (Inno Setup) and the `atelier` command |
 | `build.rs` | Collects the icons and the locales, and gives the Windows executables their name and icon |
-| `plugins/` | Ignored by git: the native plugins cloned here (`plugin-<name>` repositories) join the workspace, to be built like the IDE |
+| `api/`, `plugins/`, `docs/` | Submodules, repositories of their own: the interface of the native plugins (`atelier-ide-org/api`), the native plugins (`plugin-<name>`, each built alone against `api`, never with the IDE) and this documentation |
 
 ## Documentation
 
 The documentation is a [VitePress](https://vitepress.dev) site in its own repository, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), built with [Bun](https://bun.sh), in English (root) and French (`fr/`, same paths). Each page exists in both languages.
 
-It reads the pages of the plugins in the code of the IDE: clone both side by side (or set `ATELIER_APP` to the folder of the IDE).
+It reads the pages of the plugins in the code of the IDE, of which it is the submodule `docs/` (or set `ATELIER_APP` to the folder of the IDE).
 
 ```bash
-git clone git@github.com:atelier-ide-org/app.git
-git clone git@github.com:atelier-ide-org/plugin-gltf-viewer.git app/plugins/gltf-viewer
-git clone git@github.com:atelier-ide-org/docs.git
-cd docs
+git clone --recurse-submodules git@github.com:atelier-ide-org/app.git
+cd app/docs
 bun install
 bun run dev       # http://localhost:5173/docs/
 bun run build     # checks the links too

@@ -50,7 +50,7 @@ Il faut Rust stable et une chaîne de compilation native. Sous Windows, installe
 ```bash
 cargo run                         # lancer l'IDE
 cargo run -- chemin/du/projet     # ouvrir directement un projet
-cargo run -- examples/demo        # le projet de démonstration multilangage
+cargo run -- test/fixtures/demo   # le projet multilangage des tests
 cargo build --release             # target/release/atelier-ide(.exe)
 ```
 

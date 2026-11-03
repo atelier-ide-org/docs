@@ -25,13 +25,18 @@ import { parse } from 'yaml'
 /** The root of this repository. */
 export const docsRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 
-/** The code of the IDE: `ATELIER_APP`, else a clone of atelier-ide-org/app next to this
- * repository (`../app`), with the native plugins cloned into its `plugins/` folder. */
-export const repoRoot = path.resolve(process.env.ATELIER_APP ?? path.join(docsRoot, '../app'))
+/** The code of the IDE: `ATELIER_APP`, else the IDE this repository is the submodule `docs/` of
+ * (`..`), else a clone of atelier-ide-org/app next to it (`../app`). Its native plugins are its
+ * submodules `plugins/<name>`. */
+const parent = path.join(docsRoot, '..')
+export const repoRoot = path.resolve(
+  process.env.ATELIER_APP ??
+    (fs.existsSync(path.join(parent, 'src/plugins/builtins')) ? parent : path.join(docsRoot, '../app')),
+)
 if (!fs.existsSync(path.join(repoRoot, 'src/plugins/builtins'))) {
   throw new Error(
     `The code of Atelier is not in ${repoRoot}: clone atelier-ide-org/app there ` +
-      '(and the native plugins into its plugins/ folder), or set ATELIER_APP to its folder.',
+      'with its submodules (the native plugins), or set ATELIER_APP to its folder.',
   )
 }
 
@@ -73,7 +78,7 @@ export const watched = roots.map((r) => `${repoRoot}/${r.dir}/**/doc/*.md`.repla
 /** Every `doc` folder under `dir`, with the plugin folders that hold it, outermost first. */
 function docFolders(dir: string, chain: string[] = []): { folder: string; chain: string[] }[] {
   const out: { folder: string; chain: string[] }[] = []
-  // `plugins/` holds the clones of the native plugins, and a build of them.
+  // `plugins/` holds the native plugins (submodules), and their builds.
   if (!fs.existsSync(dir) || ['target', 'node_modules', '.git'].includes(path.basename(dir))) {
     return out
   }

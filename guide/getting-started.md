@@ -50,7 +50,7 @@ You need stable Rust and a native toolchain. On Windows, install the Visual Stud
 ```bash
 cargo run                         # start the IDE
 cargo run -- path/to/project      # open a project right away
-cargo run -- examples/demo        # the multi-language demo project
+cargo run -- test/fixtures/demo   # the multi-language project of the tests
 cargo build --release             # target/release/atelier-ide(.exe)
 ```
 
