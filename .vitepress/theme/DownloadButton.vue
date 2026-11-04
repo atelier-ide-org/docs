@@ -8,23 +8,7 @@ import { useData, withBase } from 'vitepress'
 
 defineProps<{ guide?: boolean }>()
 
-type Os = 'windows' | 'mac-arm' | 'mac-intel' | 'linux'
-
-// The public repository of the downloads (the code is in the private `app`).
-const repo = 'atelier-ide-org/releases'
-const base = `https://github.com/${repo}/releases/latest/download/`
-const files: Record<Os, string> = {
-  windows: 'atelier-setup-windows-x86_64.exe',
-  'mac-arm': 'atelier-macos-aarch64',
-  'mac-intel': 'atelier-macos-x86_64',
-  linux: 'atelier-linux-x86_64',
-}
-const names: Record<Os, string> = {
-  windows: 'Windows',
-  'mac-arm': 'macOS (Apple Silicon)',
-  'mac-intel': 'macOS (Intel)',
-  linux: 'Linux',
-}
+import { base, detectOs, files, latestRelease, names, repo, type Os } from './downloads'
 
 const { lang } = useData()
 const fr = computed(() => lang.value.startsWith('fr'))
@@ -51,24 +35,8 @@ const os = ref<Os>('windows')
 const version = ref('')
 
 onMounted(async () => {
-  const agent = navigator.userAgent
-  if (/Mac/i.test(agent)) {
-    os.value = 'mac-arm'
-    // Only Chromium tells the architecture; Safari and Firefox on a Mac get Apple Silicon.
-    const data = (navigator as any).userAgentData
-    if (data?.getHighEntropyValues) {
-      try {
-        const { architecture } = await data.getHighEntropyValues(['architecture'])
-        if (architecture === 'x86') os.value = 'mac-intel'
-      } catch {}
-    }
-  } else if (/Linux|X11/i.test(agent) && !/Android/i.test(agent)) {
-    os.value = 'linux'
-  }
-  try {
-    const response = await fetch(`https://api.github.com/repos/${repo}/releases/latest`)
-    if (response.ok) version.value = (await response.json()).tag_name ?? ''
-  } catch {}
+  os.value = await detectOs()
+  version.value = (await latestRelease())?.tag ?? ''
 })
 
 const others = computed(() => (Object.keys(files) as Os[]).filter((o) => o !== os.value))

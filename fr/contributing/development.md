@@ -51,6 +51,10 @@ Dans le code, un texte s'écrit par sa clé : `tr!("save")`, ou `trf!("files_cou
 | `build.rs` | Rassemble les icônes et les langues, et donne leur nom et leur icône aux exécutables Windows |
 | `api/`, `plugins/`, `docs/` | Des sous-modules, dépôts à part entière : l'interface des plugins natifs (`atelier-ide-org/api`), les plugins natifs (`plugin-<nom>`, chacun compilé seul avec `api`, jamais avec l'IDE) et cette documentation |
 
+## Plugins natifs
+
+Un plugin natif ne se compile pas avec l'IDE : il vit dans son propre dépôt (`plugin-<nom>`, un sous-module dans `plugins/`), et se crée, se compile et s'empaquette avec **[atelier-cli](./atelier-cli)**.
+
 ## Documentation
 
 La documentation est un site [VitePress](https://vitepress.dev) dans son propre dépôt, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), construit avec [Bun](https://bun.sh), en anglais (racine) et en français (`fr/`, mêmes chemins). Chaque page existe dans les deux langues.

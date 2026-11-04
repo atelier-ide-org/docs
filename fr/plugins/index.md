@@ -31,12 +31,7 @@ La coloration d'un langage vient de son plugin (JavaScript, Rust, Java, Markdown
 
 Les plugins intégrés sont compilés dans l'IDE : tout ce dont ils dépendent est dans son `Cargo.toml`, téléchargé et compilé avec lui, et livré à chaque utilisateur, qu'il en ait besoin ou non. Un explorateur de bases de données apporte les pilotes de MongoDB, PostgreSQL et MySQL et leur TLS ; un lecteur multimédia, une pile audio et de quoi installer ffmpeg ; une visionneuse Office, des lecteurs de zip, de XML et d'images. Ce dont seuls certains ont besoin est donc un **plugin externe** : un dépôt à part (`plugin-<nom>`), compilé seul avec ses propres dépendances, publié à part de l'IDE, et installé par ceux qui le veulent. L'IDE reste petit, se compile plus vite, et ne dépend d'aucun d'eux.
 
-| Plugin | Fichiers | Ses propres dépendances |
-| --- | --- | --- |
-| [Database](https://github.com/atelier-ide-org/plugin-database) (`database`) | une fenêtre d'outils | les pilotes MongoDB, PostgreSQL et MySQL, TLS |
-| [Microsoft Office](https://github.com/atelier-ide-org/plugin-msoffice-viewer) (`msoffice-viewer`) | `.docx`, `.xlsx`, `.pptx` et leurs variantes | zip, quick-xml, image, flate2 (PDF), rfd |
-| [Lecteur multimédia](https://github.com/atelier-ide-org/plugin-media-viewer) (`media-viewer`) | `.mp3`, `.wav`, `.flac`, `.ogg`, `.mp4`, `.mkv`, `.webm`… | rodio, et de quoi télécharger ffmpeg |
-| [Visionneuse de modèles 3D](https://github.com/atelier-ide-org/plugin-gltf-viewer) (`gltf-viewer`) | `.glb`, `.gltf` | gltf, glam, glow (OpenGL) |
+Les plugins externes d'Atelier sont listés [plus haut](#external-plugins-list), avec leur version et les fichiers qu'ils ouvrent, lus depuis leurs dépôts.
 
 Un plugin externe est soit un manifeste JSON de commandes, soit un plugin natif, une bibliothèque qui dessine dans l'IDE.
 
@@ -108,6 +103,8 @@ atelier-cli plugin compile                   # target/release/ma-visionneuse.ate
 ```
 
 Installez le fichier avec **Plugins › Installer un plugin depuis un fichier**. Dans un dépôt `plugin-<nom>` de l'organisation, monter la version de son `Cargo.toml` sur `main` le publie sous la release `plugins/<plugin>/vX.Y.Z`, et la Marketplace le liste. Les plugins d'Atelier sont aussi des sous-modules de l'IDE (`plugins/<nom>`).
+
+Toutes les commandes et options, le rôle des fichiers d'un nouveau plugin, la compilation pour d'autres systèmes et la publication sont dans **[atelier-cli](/fr/contributing/atelier-cli)**.
 
 ## Langages
 

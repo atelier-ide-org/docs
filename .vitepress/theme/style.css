@@ -1,9 +1,92 @@
-/* The violet and blue of the logo. */
+/* The look of the IDE (src/ui.rs): its "Islands" themes, Islands Light and Islands Dark, with
+   their colors as they are, its fonts (Source Sans 3 and Source Code Pro, in public/fonts, under
+   the OFL), and its corners (4 px for controls, 8 to 10 px for windows and islands). A page with a
+   sidebar is drawn like the IDE: the frame around, the page on an island. */
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('/fonts/SourceSans3-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url('/fonts/SourceSans3-Semibold.ttf') format('truetype');
+  font-weight: 500 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Source Code Pro';
+  src: url('/fonts/SourceCodePro-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+/* Islands Light */
 :root {
-  --vp-c-brand-1: #6d3df5;
-  --vp-c-brand-2: #5a2fe0;
-  --vp-c-brand-3: #4a24c4;
-  --vp-c-brand-soft: rgba(109, 61, 245, 0.14);
+  --at-frame: #e9eaee;
+  --at-island: #ffffff;
+  --at-popup: #ffffff;
+  --at-border: #c9ccd6;
+  --at-separator: #ebecf0;
+  --at-hover: #edeef2;
+  --at-selection: #d5e1ff;
+  --at-accent: #3574f0;
+  --at-accent-hover: #3369d6;
+  /* The colors of the editor for JSON and commands: keys, keywords, strings. */
+  --at-syn-key: #871094;
+  --at-syn-keyword: #0033b3;
+  --at-syn-string: #067d17;
+  --at-r-sm: 4px;
+  --at-r: 6px;
+  --at-r-md: 8px;
+  --at-r-lg: 10px;
+
+  --vp-font-family-base: 'Source Sans 3', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --vp-font-family-mono: 'Source Code Pro', 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+
+  --vp-c-bg: var(--at-island);
+  --vp-c-bg-alt: var(--at-frame);
+  --vp-c-bg-elv: var(--at-popup);
+  --vp-c-bg-soft: #f7f8fa;
+  --vp-c-border: var(--at-border);
+  --vp-c-divider: var(--at-separator);
+  --vp-c-gutter: var(--at-frame);
+
+  --vp-c-text-1: #000000;
+  --vp-c-text-2: #5e6270;
+  --vp-c-text-3: #818594;
+
+  --vp-c-default-soft: var(--at-hover);
+  --vp-c-brand-1: var(--at-accent);
+  --vp-c-brand-2: var(--at-accent-hover);
+  --vp-c-brand-3: #2e55a3;
+  --vp-c-brand-soft: rgba(53, 116, 240, 0.12);
+
+  --vp-c-green-1: #208a3c;
+  --vp-c-green-soft: rgba(32, 138, 60, 0.12);
+  --vp-c-yellow-1: #c27d04;
+  --vp-c-red-1: #e55765;
+  --vp-c-danger-1: #e55765;
+  --vp-c-danger-soft: rgba(229, 87, 101, 0.1);
+  --vp-c-warning-1: #c27d04;
+  --vp-c-warning-soft: rgba(194, 125, 4, 0.12);
+  --vp-c-tip-1: var(--at-accent);
+  --vp-c-tip-soft: var(--vp-c-brand-soft);
+
+  --vp-code-block-bg: #f7f8fa;
+  --vp-code-bg: var(--at-hover);
+  --vp-code-color: #000000;
+
+  --vp-nav-bg-color: var(--at-frame);
+  --vp-sidebar-bg-color: var(--at-frame);
+  --vp-local-nav-bg-color: var(--at-frame);
+
+  --vp-button-brand-bg: var(--at-accent);
+  --vp-button-brand-hover-bg: var(--at-accent-hover);
+  --vp-button-brand-active-bg: var(--at-accent-hover);
 
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(120deg, #f72be2 0%, #8b39f6 45%, #047cff 100%);
@@ -11,48 +94,215 @@
   --vp-home-hero-image-filter: blur(56px);
 }
 
+/* Islands Dark */
 .dark {
-  --vp-c-brand-1: #a78bfa;
-  --vp-c-brand-2: #8b6cf6;
-  --vp-c-brand-3: #6d3df5;
-  --vp-c-brand-soft: rgba(167, 139, 250, 0.16);
+  --at-frame: #26282c;
+  --at-island: #191a1c;
+  --at-popup: #2b2d30;
+  --at-border: #40434a;
+  --at-separator: #2b2d30;
+  --at-hover: #2f3135;
+  --at-selection: #2e436e;
+  --at-accent: #3871e1;
+  --at-accent-hover: #4682fa;
+  --at-syn-key: #c77dbb;
+  --at-syn-keyword: #cf8e6d;
+  --at-syn-string: #6aab73;
+
+  --vp-c-bg-soft: #1e1f22;
+  --vp-c-text-1: #dfe1e5;
+  --vp-c-text-2: #a1a3ab;
+  --vp-c-text-3: #868a91;
+
+  --vp-c-brand-1: #548af7;
+  --vp-c-brand-2: var(--at-accent-hover);
+  --vp-c-brand-3: var(--at-accent);
+  --vp-c-brand-soft: rgba(56, 113, 225, 0.18);
+
+  --vp-c-green-1: #5fb865;
+  --vp-c-green-soft: rgba(95, 184, 101, 0.14);
+  --vp-c-yellow-1: #f2c55c;
+  --vp-c-red-1: #f0605b;
+  --vp-c-danger-1: #f0605b;
+  --vp-c-danger-soft: rgba(240, 96, 91, 0.12);
+  --vp-c-warning-1: #f2c55c;
+  --vp-c-warning-soft: rgba(242, 197, 92, 0.12);
+
+  --vp-code-block-bg: #1e1f22;
+  --vp-code-bg: var(--at-frame);
+  --vp-code-color: #dfe1e5;
 }
 
-/* The catalog of plugins, first in the sidebar: a large link, as a card. */
+/* Text as in the IDE: Source Sans, a little larger than its 13 px since a page is read. */
+body {
+  font-feature-settings: normal;
+}
+
+.vp-doc h1,
+.vp-doc h2,
+.vp-doc h3 {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.vp-doc h2 {
+  border-top-color: var(--at-separator);
+}
+
+.vp-doc :not(pre) > code {
+  border-radius: var(--at-r-sm);
+}
+
+.vp-doc div[class*='language-'] {
+  border-radius: var(--at-r-md);
+  border: 1px solid var(--at-separator);
+}
+
+.vp-doc .custom-block {
+  border-radius: var(--at-r-md);
+}
+
+.vp-doc table {
+  border-radius: var(--at-r-md);
+}
+
+::selection {
+  background: var(--at-selection);
+}
+
+/* The islands: on a wide screen, the page with its sidebar sits on the frame, the page itself on
+   an island with the corners of the editor, as in the IDE. */
+@media (min-width: 960px) {
+  .Layout:has(.VPContent.has-sidebar) {
+    background: var(--at-frame);
+  }
+
+  .VPNavBar.has-sidebar .content-body,
+  .VPNavBar.has-sidebar .divider,
+  .VPNavBar:not(.home) .divider-line {
+    background: transparent !important;
+  }
+
+  .VPNavBar .divider-line {
+    background-color: transparent !important;
+  }
+
+  .VPContent.has-sidebar {
+    padding-bottom: 8px;
+  }
+
+  .VPContent.has-sidebar .VPDoc {
+    margin: 0 8px 0 0;
+    min-height: calc(100vh - var(--vp-nav-height) - 8px);
+    border: 1px solid var(--at-separator);
+    border-radius: var(--at-r-lg);
+    background: var(--at-island);
+  }
+
+  .VPSidebar .group + .group {
+    border-top-color: transparent !important;
+  }
+}
+
+/* Rows of the sidebar like the rows of the project tree: the current one selected. */
+.VPSidebarItem.is-active > .item .link > .text {
+  color: var(--vp-c-text-1) !important;
+}
+
+.VPSidebarItem.level-1.is-active > .item,
+.VPSidebarItem.level-0.is-link.is-active > .item {
+  border-radius: var(--at-r-sm);
+  background: var(--at-selection);
+}
+
+.VPSidebarItem.level-1 > .item,
+.VPSidebarItem.level-0.is-link > .item {
+  padding-left: 8px !important;
+  margin-left: -8px;
+}
+
+.VPSidebarItem .indicator {
+  display: none;
+}
+
+.VPSidebarItem.level-1 > .item:hover,
+.VPSidebarItem.level-0.is-link > .item:hover {
+  border-radius: var(--at-r-sm);
+  background: var(--at-hover);
+}
+
+/* The catalog of plugins, first in the sidebar: an entry of the IDE, as the project at the top of
+   its tree: a tile of the accent with the icon, the title and a hint under it; the hover and the
+   selection of the rows of the tree, and a separator below. */
+.VPSidebar .VPSidebarItem:has(.sidebar-catalog) {
+  padding-bottom: 12px !important;
+}
+
+.VPSidebar .group:has(.sidebar-catalog) {
+  padding-bottom: 0 !important;
+}
+
+.VPSidebar .group:has(.sidebar-catalog) + .group {
+  padding-top: 14px !important;
+}
+
+.VPSidebar .VPSidebarItem:has(.sidebar-catalog) > .item {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: none !important;
+}
+
+.VPSidebar .VPSidebarItem:has(.sidebar-catalog) .link {
+  padding: 0 !important;
+}
+
 .VPSidebar .sidebar-catalog {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin: 4px 0 8px;
-  padding: 12px 14px 12px 44px;
-  border: 1px solid var(--vp-c-brand-soft);
-  border-radius: 12px;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  margin: 2px -8px 0;
+  padding: 7px 8px;
+  border-radius: var(--at-r-sm);
+  transition: background-color 0.15s;
+}
+
+/* The tile: the four squares of a catalog on the accent. */
+.VPSidebar .sidebar-catalog::before {
+  content: '';
+  grid-row: 1 / span 2;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--at-r);
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236d3df5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='3' width='7' height='7' rx='1.5'/%3E%3Crect x='3' y='14' width='7' height='7' rx='1.5'/%3E%3Crect x='14' y='14' width='7' height='7' rx='1.5'/%3E%3C/svg%3E")
-      14px 50% / 20px no-repeat,
-    linear-gradient(120deg, var(--vp-c-brand-soft), transparent);
-  transition: border-color 0.2s, background-color 0.2s;
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='4' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='13.5' y='4' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='4' y='13.5' width='6.5' height='6.5' rx='1.5'/%3E%3Crect x='13.5' y='13.5' width='6.5' height='6.5' rx='1.5'/%3E%3C/svg%3E")
+      50% 50% / 17px no-repeat,
+    var(--at-accent);
 }
 
 .VPSidebar .sidebar-catalog .title {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.3;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--vp-c-text-1);
 }
 
 .VPSidebar .sidebar-catalog .hint {
   font-size: 12px;
   font-weight: 400;
-  line-height: 1.4;
-  color: var(--vp-c-text-2);
+  line-height: 1.3;
+  color: var(--vp-c-text-3);
 }
 
-.VPSidebar a:hover .sidebar-catalog,
+.VPSidebar a:hover .sidebar-catalog {
+  background: var(--at-hover);
+}
+
 .VPSidebar .is-active .sidebar-catalog {
-  border-color: var(--vp-c-brand-1);
+  background: var(--at-selection);
 }
 
-.VPSidebar .is-active .sidebar-catalog .title {
-  color: var(--vp-c-brand-1);
+.VPSidebar .is-active .sidebar-catalog .hint {
+  color: var(--vp-c-text-2);
 }

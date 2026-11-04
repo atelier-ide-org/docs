@@ -51,6 +51,10 @@ In the code, a text is named by its key: `tr!("save")`, or `trf!("files_count", 
 | `build.rs` | Collects the icons and the locales, and gives the Windows executables their name and icon |
 | `api/`, `plugins/`, `docs/` | Submodules, repositories of their own: the interface of the native plugins (`atelier-ide-org/api`), the native plugins (`plugin-<name>`, each built alone against `api`, never with the IDE) and this documentation |
 
+## Native plugins
+
+A native plugin is not built with the IDE: it lives in a repository of its own (`plugin-<name>`, a submodule in `plugins/`), and is made, built and packed with **[atelier-cli](./atelier-cli)**.
+
 ## Documentation
 
 The documentation is a [VitePress](https://vitepress.dev) site in its own repository, [atelier-ide-org/docs](https://github.com/atelier-ide-org/docs), built with [Bun](https://bun.sh), in English (root) and French (`fr/`, same paths). Each page exists in both languages.

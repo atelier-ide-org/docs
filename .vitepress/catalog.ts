@@ -6,6 +6,9 @@
 //     en-US.md   the page of the plugin, at /plugins/<plugin> (or /languages/<language>)
 //     fr-FR.md   its French page, at /fr/plugins/<plugin>
 //
+// The plugins of `plugins/` are external: installed from the Marketplace of the IDE, they are
+// listed apart, with the version and the file extensions of their `plugin.json`.
+//
 // The front matter of a page is the card of the plugin: `name` and `summary` in each language
 // (the IDE shows them in its Plugins page too, see build.rs), and in en-US.md only `category`,
 // `icon`, `tags` and `see`. A file with only a front matter is a card without a page; `see` then
@@ -62,18 +65,78 @@ export interface CatalogPlugin {
   link?: string
   /** The Markdown files of its pages, from the root of the repository. */
   pages: Partial<Record<Lang, string>>
+  /** For an external plugin (a submodule `plugins/<plugin>`, installed from the Marketplace):
+   * its version and the extensions of its files, from its `plugin.json`, and its repository. */
+  external?: {
+    version: string
+    /** The version of the plugin interface it was built for. */
+    abi: number
+    extensions: string[]
+    /** Its repository: `atelier-ide-org/plugin-<plugin>`. */
+    repo: string
+    /** Its releases, `plugins/<plugin>/vX.Y.Z` in atelier-ide-org/releases. */
+    releases: string
+  }
+  /** How a built-in plugin or a language is on in a project: `default` (on until turned off),
+   * or `auto` (`"auto"` in `.atelier/config.json`, on while the project has what it needs). */
+  activation?: 'default' | 'auto'
+  /** A language: the extensions of its files (`file_extensions` in its `mod.rs`), which turn it
+   * on in `auto`. */
+  files?: string[]
+  /** Its code: the folder that holds its `doc`, from the root of its repository
+   * (`src/plugins/builtins/cargo`). */
+  code?: string
 }
 
-const roots: { dir: string; section: Section }[] = [
+/** The built-in plugins that are `"auto"` by default, besides the languages: on while the
+ * project has what they need (see `Ide::follow_auto_plugins` in src/app.rs). */
+const autoPlugins = new Set(['git'])
+
+/** The extensions of the files of a language, from `fn file_extensions` in its `mod.rs`. */
+function languageFiles(folder: string): string[] {
+  const file = path.join(folder, 'mod.rs')
+  if (!fs.existsSync(file)) return []
+  const match = fs
+    .readFileSync(file, 'utf8')
+    .match(/fn file_extensions\(&self\)[^{]*\{\s*&\[([^\]]*)\]/)
+  return match ? [...match[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]) : []
+}
+
+const roots: { dir: string; section: Section; external?: true }[] = [
   { dir: 'src/plugins/builtins', section: 'plugins' },
-  { dir: 'plugins', section: 'plugins' },
+  { dir: 'plugins', section: 'plugins', external: true },
   { dir: 'src/languages', section: 'languages' },
 ]
 
 const files: Record<Lang, string> = { en: 'en-US.md', fr: 'fr-FR.md' }
 
 /** Globs of every file the catalog is read from, for the watchers of `vitepress dev`. */
-export const watched = roots.map((r) => `${repoRoot}/${r.dir}/**/doc/*.md`.replace(/\\/g, '/'))
+export const watched = [
+  ...roots.map((r) => `${repoRoot}/${r.dir}/**/doc/*.md`),
+  `${repoRoot}/plugins/*/plugin.json`,
+  `${repoRoot}/src/languages/*/mod.rs`,
+].map((g) => g.replace(/\\/g, '/'))
+
+/** The manifest of an external plugin: its version and the extensions of its files. */
+function manifest(folder: string, slug: string): NonNullable<CatalogPlugin['external']> {
+  const file = path.join(folder, 'plugin.json')
+  if (!fs.existsSync(file)) fail(file, 'missing: an external plugin needs its manifest')
+  let json: any
+  try {
+    json = JSON.parse(fs.readFileSync(file, 'utf8'))
+  } catch (e) {
+    fail(file, `not valid JSON (${(e as Error).message})`)
+  }
+  if (typeof json.version !== 'string') fail(file, '"version" is required')
+  if (typeof json.abi !== 'number') fail(file, '"abi" is required')
+  return {
+    version: json.version,
+    abi: json.abi,
+    extensions: Array.isArray(json.extensions) ? json.extensions.map(String) : [],
+    repo: `https://github.com/atelier-ide-org/plugin-${slug}`,
+    releases: `https://github.com/atelier-ide-org/releases/releases?q=${encodeURIComponent(`plugins/${slug}/`)}&expanded=true`,
+  }
+}
 
 /** Every `doc` folder under `dir`, with the plugin folders that hold it, outermost first. */
 function docFolders(dir: string, chain: string[] = []): { folder: string; chain: string[] }[] {
@@ -163,6 +226,15 @@ export function loadCatalog(): CatalogPlugin[] {
             ? `${root.section}/${en.see}`
             : undefined,
         pages,
+        external: root.external && chain.length === 1 ? manifest(folder, slug) : undefined,
+        ...(root.external
+          ? {}
+          : {
+              activation:
+                root.section === 'languages' || autoPlugins.has(slug) ? 'auto' : 'default',
+              files: root.section === 'languages' ? languageFiles(folder) : undefined,
+              code: relative(folder),
+            }),
       })
     }
   }
@@ -176,12 +248,16 @@ export function loadCatalog(): CatalogPlugin[] {
 }
 
 /** The routes of the pages of one section in one language, for a `[name].paths.ts` file: the
- * body of the page, without its front matter (the card). */
+ * body of the page, without its front matter (the card). Every page starts with a header made
+ * from its card (theme/PluginHero.vue), which gives its title: its own `# Title` is left out. */
 export function pageRoutes(section: Section, lang: Lang, param: string) {
   return loadCatalog()
     .filter((p) => p.section === section && p.pages[lang])
-    .map((p) => ({
-      params: { [param]: p.slug, source: p.pages[lang] },
-      content: read(path.join(repoRoot, p.pages[lang]!)).body,
-    }))
+    .map((p) => {
+      const body = read(path.join(repoRoot, p.pages[lang]!)).body
+      return {
+        params: { [param]: p.slug, source: p.pages[lang], title: p.name[lang] },
+        content: body.replace(/^# .*\n+/, ''),
+      }
+    })
 }

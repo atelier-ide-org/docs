@@ -10,11 +10,15 @@ import { loadCatalog, repoRoot, type Lang, type Section } from './catalog'
 const repo = 'https://github.com/atelier-ide-org/docs'
 const catalog = loadCatalog()
 
-/** The pages of the plugins (or languages) that have one, by name. */
-function pages(section: Section, prefix: string): DefaultTheme.SidebarItem[] {
+/** The pages of the plugins (or languages) that have one, by name: the built-in plugins, or the
+ * external ones with `external`. */
+function pages(section: Section, prefix: string, external = false): DefaultTheme.SidebarItem[] {
   const lang: Lang = prefix ? 'fr' : 'en'
+  // A sub-plugin is external when its parent is.
+  const isExternal = (p: (typeof catalog)[number]): boolean =>
+    !!p.external || (!!p.parent && isExternal(catalog.find((q) => q.slug === p.parent)!))
   return catalog
-    .filter((p) => p.section === section && p.pages[lang])
+    .filter((p) => p.section === section && p.pages[lang] && isExternal(p) === external)
     .map((p) => ({ text: p.name[lang], link: `${prefix}/${section}/${p.slug}` }))
     .sort((a, b) => a.text.localeCompare(b.text, lang))
 }
@@ -50,6 +54,15 @@ function sidebar(prefix: string, t: Record<string, string>): DefaultTheme.Sideba
         { text: t.run, link: `${prefix}/guide/running` },
         { text: t.shortcuts, link: `${prefix}/guide/shortcuts` },
         { text: t.cli, link: `${prefix}/guide/command-line` },
+        // Making plugins: the command line, then the interface.
+        {
+          text: t.development,
+          collapsed: false,
+          items: [
+            { text: 'atelier-cli', link: `${prefix}/contributing/atelier-cli` },
+            { text: t.pluginApi, link: `${prefix}/contributing/plugin-api` },
+          ],
+        },
       ],
     },
     {
@@ -65,6 +78,10 @@ function sidebar(prefix: string, t: Record<string, string>): DefaultTheme.Sideba
       collapsed: false,
       items: pages('plugins', prefix),
     },
+    // Only when an external plugin has a page.
+    ...(pages('plugins', prefix, true).length
+      ? [{ text: t.externals, collapsed: false, items: pages('plugins', prefix, true) }]
+      : []),
     {
       text: t.ai,
       items: [
@@ -94,13 +111,15 @@ const en = {
   format: 'Reformat code',
   schemas: 'JSON & YAML schemas',
   catalog: 'Plugin catalog',
-  catalogHint: 'Every built-in plugin and language',
+  catalogHint: 'Every plugin and language',
+  externals: 'External plugins',
   ai: 'AI',
   mcp: 'MCP server & sessions',
   graph: 'Context graph',
   commits: 'Commits by AI',
   contributing: 'Contributing',
   development: 'Development',
+  pluginApi: 'Plugin API',
   releases: 'Versions & releases',
 }
 
@@ -115,13 +134,15 @@ const fr = {
   format: 'Reformater le code',
   schemas: 'Schémas JSON et YAML',
   catalog: 'Catalogue des plugins',
-  catalogHint: 'Tous les plugins et langages intégrés',
+  catalogHint: 'Tous les plugins et langages',
+  externals: 'Plugins externes',
   ai: 'IA',
   mcp: 'Serveur MCP et sessions',
   graph: 'Graphe de contexte',
   commits: 'Commits par l’IA',
   contributing: 'Contribuer',
   development: 'Développement',
+  pluginApi: 'API des plugins',
   releases: 'Versions et releases',
 }
 
@@ -137,6 +158,9 @@ export default defineConfig({
   transformPageData(page) {
     const source = page.params?.source
     if (!source) return
+    // The title of the page of a plugin is its name (the header of an external plugin has no
+    // `# Title` in the Markdown to take it from).
+    if (page.params?.title) page.title = page.params.title
     try {
       // From the folder of the file: a native plugin is a repository of its own.
       const file = path.join(repoRoot, source)
@@ -182,8 +206,8 @@ export default defineConfig({
         nav: [
           { text: 'Guide', link: '/guide/getting-started', activeMatch: '^/guide/' },
           { text: 'Plugins', link: '/plugins/', activeMatch: '^/(plugins|languages)/' },
-          { text: 'Download', link: `${repo}/releases/latest` },
-          { text: 'Changelog', link: `${repo}/blob/main/CHANGELOG.md` },
+          { text: 'Download', link: '/download' },
+          { text: 'Changelog', link: '/changelog' },
         ],
         sidebar: sidebar('', en),
         editLink: editLink('Edit this page on GitHub'),
@@ -198,8 +222,8 @@ export default defineConfig({
         nav: [
           { text: 'Guide', link: '/fr/guide/getting-started', activeMatch: '^/fr/guide/' },
           { text: 'Plugins', link: '/fr/plugins/', activeMatch: '^/fr/(plugins|languages)/' },
-          { text: 'Télécharger', link: `${repo}/releases/latest` },
-          { text: 'Changelog', link: `${repo}/blob/main/CHANGELOG.md` },
+          { text: 'Télécharger', link: '/fr/download' },
+          { text: 'Changelog', link: '/fr/changelog' },
         ],
         sidebar: sidebar('/fr', fr),
         editLink: editLink('Modifier cette page sur GitHub'),

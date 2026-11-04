@@ -31,12 +31,7 @@ The coloring of a language comes with its plugin (JavaScript, Rust, Java, Markdo
 
 The built-in plugins are compiled into the IDE: everything they depend on is in its `Cargo.toml`, downloaded and built with it, and shipped to every user, whether they need it or not. A database viewer brings the drivers of MongoDB, PostgreSQL and MySQL and their TLS; a media player brings an audio stack and what installs ffmpeg; an Office viewer brings readers of zip, XML and pictures. So what only some users need is an **external plugin**: a repository of its own (`plugin-<name>`), built alone with its own dependencies, published apart from the IDE, and installed by those who want it. The IDE stays small, builds faster, and depends on none of them.
 
-| Plugin | Files | Its own dependencies |
-| --- | --- | --- |
-| [Database](https://github.com/atelier-ide-org/plugin-database) (`database`) | a tool window | the MongoDB, PostgreSQL and MySQL drivers, TLS |
-| [Microsoft Office](https://github.com/atelier-ide-org/plugin-msoffice-viewer) (`msoffice-viewer`) | `.docx`, `.xlsx`, `.pptx` and their variants | zip, quick-xml, image, flate2 (PDF), rfd |
-| [Media Player](https://github.com/atelier-ide-org/plugin-media-viewer) (`media-viewer`) | `.mp3`, `.wav`, `.flac`, `.ogg`, `.mp4`, `.mkv`, `.webm`… | rodio, and what downloads ffmpeg |
-| [3D Model Viewer](https://github.com/atelier-ide-org/plugin-gltf-viewer) (`gltf-viewer`) | `.glb`, `.gltf` | gltf, glam, glow (OpenGL) |
+The external plugins of Atelier are listed [above](#external-plugins-list), with their version and the files they open, read from their repositories.
 
 An external plugin is either a JSON manifest of commands, or a native plugin, a library that draws in the IDE.
 
@@ -108,6 +103,8 @@ atelier-cli plugin compile               # target/release/my-viewer.atelier-plug
 ```
 
 Install the file with **Plugins › Install a plugin from a file**. In a repository `plugin-<name>` of the organization, raising the version of its `Cargo.toml` on `main` publishes it as the release `plugins/<plugin>/vX.Y.Z`, and the Marketplace lists it. The plugins of Atelier are also submodules of the IDE (`plugins/<name>`).
+
+Every command and option, what the files of a new plugin are for, building for other systems and publishing are in **[atelier-cli](/contributing/atelier-cli)**.
 
 ## Languages
 
